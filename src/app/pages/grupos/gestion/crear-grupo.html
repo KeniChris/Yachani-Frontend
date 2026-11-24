@@ -30,61 +30,75 @@
     >
   </section>
 } @else {
-<div class="layout">
+<div class="layout" [class.con-asistente]="esTutor">
   <form class="content-card form-card" [formGroup]="form" aria-label="Datos del grupo">
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
-      <mat-label>Nombre del grupo</mat-label>
-      <input
-        matInput
-        formControlName="nombre"
-        [placeholder]="esTutor ? 'Ej.: Dominando Cálculo' : 'Ej.: Ingeniería de Software: repasos'"
-        required
-      />
-      @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
-        <mat-error>Escribe el nombre del grupo.</mat-error>
-      } @else {
-        <mat-hint>Incluye el curso o tema para facilitar su búsqueda.</mat-hint>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
-      <mat-label>Descripción</mat-label>
-      <textarea
-        matInput
-        formControlName="descripcion"
-        rows="4"
-        maxlength="500"
-        placeholder="Ej.: Un espacio para repasar conceptos, compartir recursos y resolver ejercicios."
-        required
-      ></textarea>
-      @if (form.controls.descripcion.touched && form.controls.descripcion.invalid) {
-        <mat-error>Escribe una descripción de hasta 500 caracteres.</mat-error>
-      } @else {
-        <mat-hint>Hasta 500 caracteres.</mat-hint>
-      }
-    </mat-form-field>
-
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
-      <mat-label>Método de estudio</mat-label>
-      <mat-select formControlName="metodo" placeholder="Selecciona un método de estudio…" required>
-        @for (metodo of metodos; track metodo) {
-          <mat-option [value]="metodo">{{ metodo }}</mat-option>
+    <!-- Un campo con sugerencia de la IA se marca en verde y muestra Aceptar/Descartar
+         en lugar de su ayuda. -->
+    <div class="campo" [class.campo-sugerido]="sugerencias().nombre">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+        <mat-label>Nombre del grupo</mat-label>
+        <input
+          matInput
+          formControlName="nombre"
+          [placeholder]="esTutor ? 'Ej.: Dominando Cálculo' : 'Ej.: Ingeniería de Software: repasos'"
+          required
+        />
+        @if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+          <mat-error>Escribe el nombre del grupo.</mat-error>
+        } @else if (!sugerencias().nombre) {
+          <mat-hint>Incluye el curso o tema para facilitar su búsqueda.</mat-hint>
         }
-      </mat-select>
-      @if (form.controls.metodo.touched && form.controls.metodo.invalid) {
-        <mat-error>Selecciona un método de estudio.</mat-error>
-      }
-    </mat-form-field>
+      </mat-form-field>
+      <ng-container *ngTemplateOutlet="accionesIa; context: { $implicit: 'nombre' }" />
+    </div>
 
-    <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
-      <mat-label>Capacidad máxima</mat-label>
-      <input matInput type="number" formControlName="capacidad" min="2" placeholder="Ej.: 12" required />
-      @if (form.controls.capacidad.touched && form.controls.capacidad.invalid) {
-        <mat-error>La capacidad mínima es de 2 integrantes.</mat-error>
-      } @else {
-        <mat-hint>Elige un número a partir de 2.</mat-hint>
-      }
-    </mat-form-field>
+    <div class="campo" [class.campo-sugerido]="sugerencias().descripcion">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+        <mat-label>Descripción</mat-label>
+        <textarea
+          matInput
+          formControlName="descripcion"
+          rows="4"
+          maxlength="500"
+          placeholder="Ej.: Un espacio para repasar conceptos, compartir recursos y resolver ejercicios."
+          required
+        ></textarea>
+        @if (form.controls.descripcion.touched && form.controls.descripcion.invalid) {
+          <mat-error>Escribe una descripción de hasta 500 caracteres.</mat-error>
+        } @else if (!sugerencias().descripcion) {
+          <mat-hint>Hasta 500 caracteres.</mat-hint>
+        }
+      </mat-form-field>
+      <ng-container *ngTemplateOutlet="accionesIa; context: { $implicit: 'descripcion' }" />
+    </div>
+
+    <div class="campo" [class.campo-sugerido]="sugerencias().metodo">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+        <mat-label>Método de estudio</mat-label>
+        <mat-select formControlName="metodo" placeholder="Selecciona un método de estudio…" required>
+          @for (metodo of metodos; track metodo) {
+            <mat-option [value]="metodo">{{ metodo }}</mat-option>
+          }
+        </mat-select>
+        @if (form.controls.metodo.touched && form.controls.metodo.invalid) {
+          <mat-error>Selecciona un método de estudio.</mat-error>
+        }
+      </mat-form-field>
+      <ng-container *ngTemplateOutlet="accionesIa; context: { $implicit: 'metodo' }" />
+    </div>
+
+    <div class="campo" [class.campo-sugerido]="sugerencias().capacidad">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+        <mat-label>Capacidad máxima</mat-label>
+        <input matInput type="number" formControlName="capacidad" min="2" placeholder="Ej.: 12" required />
+        @if (form.controls.capacidad.touched && form.controls.capacidad.invalid) {
+          <mat-error>La capacidad mínima es de 2 integrantes.</mat-error>
+        } @else if (!sugerencias().capacidad) {
+          <mat-hint>Elige un número a partir de 2.</mat-hint>
+        }
+      </mat-form-field>
+      <ng-container *ngTemplateOutlet="accionesIa; context: { $implicit: 'capacidad' }" />
+    </div>
 
     @if (errorCrear()) {
       <div class="notice" role="status">
@@ -117,15 +131,29 @@
       }}
     </p>
     <p class="type-help">El tipo se determina con el rol de tu cuenta. No necesitas elegirlo.</p>
-    @if (esTutor) {
-      <a
-        mat-stroked-button
-        routerLink="/grupos/crear-con-ia"
-        [queryParams]="{ crear: null }"
-        queryParamsHandling="merge"
-        >Crear con apoyo de IA</a
-      >
-    }
   </aside>
 </div>
+
+@if (esTutor) {
+  <app-asistente-ia [leerFormulario]="leerFormulario" (sugerir)="aplicarSugerencias($event)" />
 }
+}
+
+<ng-template #accionesIa let-campo>
+  @if (tieneSugerencia(campo)) {
+    <div class="acciones-ia">
+      <button mat-button type="button" class="aceptar" (click)="aceptarSugerencia(campo)">
+        <mat-icon fontSet="material-symbols-rounded">check</mat-icon>
+        Aceptar
+      </button>
+      <button mat-button type="button" class="descartar" (click)="descartarSugerencia(campo)">
+        <mat-icon fontSet="material-symbols-rounded">close</mat-icon>
+        Descartar
+      </button>
+      <span class="sugerido-ia">
+        <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">auto_awesome</mat-icon>
+        Sugerido por la IA
+      </span>
+    </div>
+  }
+</ng-template>

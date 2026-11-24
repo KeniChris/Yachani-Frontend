@@ -1,0 +1,149 @@
+/* Botón flotante y panel del asistente: fijos abajo a la derecha, sobre el contenido. */
+.fab,
+.panel {
+  position: fixed;
+  right: var(--space-6);
+  bottom: var(--space-6);
+  z-index: 10;
+}
+.fab {
+  border-radius: 999px;
+  box-shadow: 0 12px 27px rgba(147, 51, 234, 0.25);
+}
+.panel {
+  display: flex;
+  flex-direction: column;
+  width: min(24rem, calc(100vw - 2 * var(--space-6)));
+  height: min(30rem, calc(100dvh - var(--topbar-height) - 2 * var(--space-6)));
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: 0 20px 55px rgba(46, 24, 59, 0.09);
+  overflow: hidden;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-4);
+  border-bottom: 1px solid var(--color-outline);
+}
+.panel-header h2 {
+  flex: 1;
+  font: var(--font-control);
+}
+.panel-header button {
+  color: var(--color-muted);
+}
+.chispa {
+  color: var(--color-primary);
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+.mensajes {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.mensaje,
+.pensando {
+  margin: 0;
+}
+.mensaje {
+  max-width: 100%;
+  font: var(--font-secondary);
+  overflow-wrap: anywhere;
+}
+/* Mismo estilo que los mensajes propios del chat grupal. */
+.mensaje.propio {
+  align-self: flex-end;
+  max-width: 85%;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-control);
+  background: var(--color-active);
+}
+.mensaje.error {
+  color: var(--color-error);
+}
+.pensando {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: var(--font-help);
+  color: var(--color-muted);
+}
+.puntos {
+  display: inline-flex;
+  gap: 3px;
+}
+.puntos i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-primary);
+  animation: latido 1.2s infinite ease-in-out;
+}
+.puntos i:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.puntos i:nth-child(3) {
+  animation-delay: 0.4s;
+}
+@keyframes latido {
+  0%,
+  80%,
+  100% {
+    opacity: 0.3;
+  }
+  40% {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .puntos i {
+    animation: none;
+  }
+}
+.composer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+}
+.composer mat-form-field {
+  flex: 1;
+  min-width: 0;
+}
+.composer input {
+  font: var(--font-secondary);
+}
+.send {
+  flex: none;
+  min-width: 48px;
+  height: 48px;
+  padding: 0;
+}
+.send mat-icon {
+  margin: 0;
+}
+/* En móvil quedan por encima de la barra de navegación inferior. */
+@media (max-width: 767px) {
+  .fab,
+  .panel {
+    right: var(--space-4);
+    bottom: calc(var(--mobile-nav-height) + var(--space-4) + env(safe-area-inset-bottom, 0px));
+  }
+  .panel {
+    left: var(--space-4);
+    width: auto;
+    height: calc(
+      100dvh - var(--mobile-topbar-height) - var(--mobile-nav-height) - 2 * var(--space-4) -
+        env(safe-area-inset-bottom, 0px)
+    );
+  }
+}
