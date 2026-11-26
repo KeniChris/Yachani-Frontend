@@ -72,3 +72,53 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Temas y plan de sesiones de la propuesta. */
+.seccion {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.seccion legend {
+  font: var(--font-control);
+  margin-bottom: var(--space-1);
+}
+.opcional {
+  color: var(--color-muted);
+  font-weight: normal;
+}
+.fila-lista {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-2);
+}
+.tarjeta-sesion {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-control);
+}
+.encabezado-sesion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.encabezado-sesion h3 {
+  font: var(--font-control);
+}
+.fecha-hora {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+.error-lista {
+  font: var(--font-help);
+  color: var(--color-error);
+}
+.notice.warning {
+  background: var(--color-warning-surface);
+  color: var(--color-warning);
+}

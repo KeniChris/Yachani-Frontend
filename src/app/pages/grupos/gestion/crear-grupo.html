@@ -100,6 +100,142 @@
       <ng-container *ngTemplateOutlet="accionesIa; context: { $implicit: 'capacidad' }" />
     </div>
 
+    <!-- Temas iniciales (tutor y estudiante): se guardan junto con el grupo. -->
+    <fieldset class="seccion" formArrayName="temas" [class.campo-sugerido]="sugerencias().temas">
+      <legend>Temas iniciales <span class="opcional">(opcional)</span></legend>
+      <ng-container *ngTemplateOutlet="accionesIa; context: { $implicit: 'temas' }" />
+      <p class="help">Agrega hasta {{ maximoTemas }} temas. Luego podrás verlos en Recursos.</p>
+      @for (tema of temas.controls; track tema; let i = $index) {
+        <div class="fila-lista">
+          <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+            <mat-label>Tema {{ i + 1 }}</mat-label>
+            <input matInput [formControlName]="i" maxlength="100" placeholder="Ej.: Derivadas" required />
+            @if (tema.touched && tema.invalid) {
+              <mat-error>Escribe el tema (hasta 100 caracteres).</mat-error>
+            }
+          </mat-form-field>
+          <button
+            mat-icon-button
+            type="button"
+            [attr.aria-label]="'Quitar el tema ' + (i + 1)"
+            (click)="quitarTema(i)"
+          >
+            <mat-icon fontSet="material-symbols-rounded">delete</mat-icon>
+          </button>
+        </div>
+      }
+      @if (temas.hasError('temaRepetido')) {
+        <p class="error-lista" role="alert">Los temas no pueden repetirse.</p>
+      }
+      <div>
+        <button
+          mat-stroked-button
+          type="button"
+          [disabled]="temas.length >= maximoTemas || guardando()"
+          (click)="agregarTema()"
+        >
+          <mat-icon fontSet="material-symbols-rounded">add</mat-icon>
+          Agregar tema
+        </button>
+      </div>
+    </fieldset>
+
+    <!-- Plan de sesiones (solo tutor): se programan al crear el grupo. -->
+    @if (esTutor) {
+      <fieldset class="seccion" formArrayName="sesiones" [class.campo-sugerido]="sugerencias().sesiones">
+        <legend>Plan de sesiones <span class="opcional">(opcional)</span></legend>
+        <ng-container *ngTemplateOutlet="accionesIa; context: { $implicit: 'sesiones' }" />
+        @if (sugerencias().sesiones) {
+          <p class="help">La IA no elige fecha, hora ni lugar: complétalos antes de crear el grupo.</p>
+        }
+        <p class="help">Agrega hasta {{ maximoSesiones }} sesiones. Fecha y hora en horario de Lima.</p>
+        @for (sesionForm of sesiones.controls; track sesionForm; let i = $index) {
+          <div class="tarjeta-sesion" [formGroupName]="i">
+            <div class="encabezado-sesion">
+              <h3>Sesión {{ i + 1 }}</h3>
+              <button
+                mat-icon-button
+                type="button"
+                [attr.aria-label]="'Quitar la sesión ' + (i + 1)"
+                (click)="quitarSesion(i)"
+              >
+                <mat-icon fontSet="material-symbols-rounded">delete</mat-icon>
+              </button>
+            </div>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+              <mat-label>Tema de la sesión</mat-label>
+              <input matInput formControlName="tema" maxlength="150" placeholder="Ej.: Repaso de derivadas" required />
+              @if (sesionForm.controls.tema.touched && sesionForm.controls.tema.invalid) {
+                <mat-error>Escribe el tema (hasta 150 caracteres).</mat-error>
+              }
+            </mat-form-field>
+            <div class="fecha-hora">
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+                <mat-label>Fecha</mat-label>
+                <input
+                  matInput
+                  formControlName="fecha"
+                  [matDatepicker]="fechaPicker"
+                  [min]="hoy"
+                  placeholder="dd/mm/aaaa"
+                  required
+                />
+                <mat-datepicker-toggle matIconSuffix [for]="fechaPicker" />
+                <mat-datepicker #fechaPicker />
+                @if (sesionForm.controls.fecha.touched && sesionForm.controls.fecha.invalid) {
+                  <mat-error>Elige la fecha.</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+                <mat-label>Hora</mat-label>
+                <input matInput formControlName="hora" [matTimepicker]="horaPicker" placeholder="hh:mm" required />
+                <mat-timepicker-toggle matIconSuffix [for]="horaPicker" />
+                <mat-timepicker #horaPicker />
+                @if (sesionForm.controls.hora.touched && sesionForm.controls.hora.invalid) {
+                  <mat-error>Indica la hora.</mat-error>
+                }
+              </mat-form-field>
+              <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+                <mat-label>Duración (min)</mat-label>
+                <input matInput type="number" formControlName="duracion" min="15" max="480" required />
+                @if (sesionForm.controls.duracion.touched && sesionForm.controls.duracion.invalid) {
+                  <mat-error>Entre 15 y 480 minutos.</mat-error>
+                }
+              </mat-form-field>
+            </div>
+            @if (sesionForm.hasError('fechaPasada')) {
+              <p class="error-lista" role="alert">La fecha y hora deben ser posteriores al momento actual.</p>
+            }
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+              <mat-label>Lugar <span class="opcional">(opcional)</span></mat-label>
+              <input matInput formControlName="lugar" maxlength="200" placeholder="Ej.: Google Meet o Aula 204" />
+            </mat-form-field>
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" floatLabel="always">
+              <mat-label>Descripción <span class="opcional">(opcional)</span></mat-label>
+              <textarea matInput formControlName="descripcion" rows="2" maxlength="500"></textarea>
+            </mat-form-field>
+          </div>
+        }
+        <div>
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="sesiones.length >= maximoSesiones || guardando()"
+            (click)="agregarSesion()"
+          >
+            <mat-icon fontSet="material-symbols-rounded">add</mat-icon>
+            Agregar sesión
+          </button>
+        </div>
+      </fieldset>
+    }
+
+    @if (haySugerenciasPendientes()) {
+      <div class="notice warning" role="status">
+        <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">warning</mat-icon>
+        <p class="notice-title">Acepta o descarta los cambios sugeridos antes de crear el grupo.</p>
+      </div>
+    }
     @if (errorCrear()) {
       <div class="notice" role="status">
         <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">error</mat-icon>
@@ -114,8 +250,13 @@
         queryParamsHandling="merge"
         >Cancelar</a
       >
-      <button mat-flat-button type="button" [disabled]="form.invalid" (click)="crearGrupo()">
-        Crear grupo
+      <button
+        mat-flat-button
+        type="button"
+        [disabled]="form.invalid || haySugerenciasPendientes() || guardando()"
+        (click)="crearGrupo()"
+      >
+        {{ guardando() ? 'Creando grupo…' : 'Crear grupo' }}
       </button>
     </div>
   </form>
