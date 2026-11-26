@@ -21,9 +21,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { Subscription } from 'rxjs';
 import {
-  FormularioGrupoIa,
+  CambiosPropuestaIa,
   MensajeAsistenteIa,
-  SugerenciasGrupoIa,
+  PropuestaGrupoIa,
 } from '../../../../core/models/asistente-grupo.models';
 import { AuthService } from '../../../../core/services/auth.service';
 import { errorApi } from '../../../../core/services/recursos-ui';
@@ -36,8 +36,9 @@ interface MensajeChat extends MensajeAsistenteIa {
   error?: boolean;
 }
 
-// Asistente IA flotante de "Crear grupo" (tutor). Conversa con el tutor y, cuando propone
-// cambios, los emite con (sugerir) para que el formulario los marque en verde.
+// Asistente IA flotante de "Crear grupo" (tutor). Conversa con el tutor usando el agente de
+// propuesta (POST /ia/tutorias/ajuste) y, cuando propone cambios (incluidos temas y plan de
+// sesiones), los emite con (sugerir) para que el formulario los marque en verde.
 @Component({
   selector: 'app-asistente-ia',
   standalone: true,
@@ -52,8 +53,8 @@ export class AsistenteIa {
   private readonly injector = inject(Injector);
 
   // Lee el formulario en el momento de enviar: así la IA ve lo último que escribió el tutor.
-  @Input({ required: true }) leerFormulario!: () => FormularioGrupoIa;
-  @Output() readonly sugerir = new EventEmitter<SugerenciasGrupoIa>();
+  @Input({ required: true }) leerFormulario!: () => PropuestaGrupoIa;
+  @Output() readonly sugerir = new EventEmitter<CambiosPropuestaIa>();
 
   @ViewChild('lista') private lista?: ElementRef<HTMLElement>;
   @ViewChild('campoPedido') private campoPedido?: ElementRef<HTMLInputElement>;
@@ -114,13 +115,13 @@ export class AsistenteIa {
     this.alFinal();
 
     this.peticion = this.ia
-      .conversar({ pedido: texto, formulario: this.leerFormulario(), historial })
+      .ajustar({ mensaje: texto, propuesta: this.leerFormulario(), historial })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: (respuesta) => {
           this.pensando.set(false);
           this.responder({ rol: 'ASISTENTE', texto: respuesta.respuesta });
-          if (respuesta.sugerencias) this.sugerir.emit(respuesta.sugerencias);
+          if (respuesta.cambios) this.sugerir.emit(respuesta.cambios);
         },
         error: (error: unknown) => {
           this.pensando.set(false);

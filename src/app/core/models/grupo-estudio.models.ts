@@ -36,6 +36,19 @@ export interface CrearGrupoRequest {
   capacidadMaxima: number;
   idCreador: number;
   temasIniciales?: string[];
+  // Solo para tutores. El backend crea el grupo, los temas y las sesiones en una sola
+  // transacción: si una sesión es inválida no se guarda nada.
+  sesionesIniciales?: SesionInicialRequest[];
+}
+
+// Coincide con com.yachaniapi.grupoestudio.dto.request.SesionInicialRequest.
+export interface SesionInicialRequest {
+  tema: string;
+  descripcion: string | null;
+  // Hora local ISO sin "Z" (LocalDateTime), p. ej. "2026-12-01T19:00:00".
+  fechaHoraInicio: string;
+  duracionMinutos: number;
+  lugar: string | null;
 }
 
 export interface FiltrarGruposParams {
