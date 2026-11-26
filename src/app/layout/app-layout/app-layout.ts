@@ -129,12 +129,6 @@ get usuario(): {
       { label: 'Mis grupos', short: 'Grupos', path: '/grupos/gestion', icon: 'groups' },
       { label: 'Crear grupo', short: 'Crear', path: '/grupos/crear', icon: 'add' },
       {
-        label: 'Crear grupo con IA',
-        short: 'Crear con IA',
-        path: '/grupos/crear-con-ia',
-        icon: 'auto_awesome',
-      },
-      {
         label: 'Solicitudes',
         short: 'Solicitudes',
         path: '/grupos/solicitudes',

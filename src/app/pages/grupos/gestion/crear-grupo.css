@@ -20,6 +20,53 @@
   font: var(--font-help);
   color: var(--color-muted);
 }
+/* Espacio para que el botón flotante del asistente no tape "Crear grupo" al final. */
+.layout.con-asistente {
+  padding-bottom: calc(48px + var(--space-6));
+}
+/* Sugerencia pendiente del asistente IA: campo en verde (tokens de éxito del proyecto). */
+.campo {
+  display: grid;
+  gap: var(--space-1);
+}
+.campo-sugerido mat-form-field {
+  --mat-form-field-outlined-outline-color: var(--color-success-accent);
+  --mat-form-field-outlined-hover-outline-color: var(--color-success-accent);
+  --mat-form-field-outlined-focus-outline-color: var(--color-success-accent);
+  --mat-form-field-outlined-outline-width: 2px;
+  --mat-form-field-outlined-label-text-color: var(--color-success);
+  --mat-form-field-outlined-hover-label-text-color: var(--color-success);
+  --mat-form-field-outlined-focus-label-text-color: var(--color-success);
+}
+.campo-sugerido ::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: var(--radius-control);
+  background: var(--color-success-surface);
+}
+.acciones-ia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+.acciones-ia .aceptar {
+  color: var(--color-success);
+}
+.acciones-ia .descartar {
+  color: var(--color-muted);
+}
+.sugerido-ia {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  font: var(--font-help);
+  color: var(--color-success);
+}
+.sugerido-ia mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
 @media (max-width: 1000px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
