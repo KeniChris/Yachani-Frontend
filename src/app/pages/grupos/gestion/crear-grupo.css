@@ -20,8 +20,105 @@
   font: var(--font-help);
   color: var(--color-muted);
 }
+/* Espacio para que el botón flotante del asistente no tape "Crear grupo" al final. */
+.layout.con-asistente {
+  padding-bottom: calc(48px + var(--space-6));
+}
+/* Sugerencia pendiente del asistente IA: campo en verde (tokens de éxito del proyecto). */
+.campo {
+  display: grid;
+  gap: var(--space-1);
+}
+.campo-sugerido mat-form-field {
+  --mat-form-field-outlined-outline-color: var(--color-success-accent);
+  --mat-form-field-outlined-hover-outline-color: var(--color-success-accent);
+  --mat-form-field-outlined-focus-outline-color: var(--color-success-accent);
+  --mat-form-field-outlined-outline-width: 2px;
+  --mat-form-field-outlined-label-text-color: var(--color-success);
+  --mat-form-field-outlined-hover-label-text-color: var(--color-success);
+  --mat-form-field-outlined-focus-label-text-color: var(--color-success);
+}
+.campo-sugerido ::ng-deep .mat-mdc-text-field-wrapper {
+  border-radius: var(--radius-control);
+  background: var(--color-success-surface);
+}
+.acciones-ia {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-2);
+}
+.acciones-ia .aceptar {
+  color: var(--color-success);
+}
+.acciones-ia .descartar {
+  color: var(--color-muted);
+}
+.sugerido-ia {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  margin-left: auto;
+  font: var(--font-help);
+  color: var(--color-success);
+}
+.sugerido-ia mat-icon {
+  font-size: 16px;
+  width: 16px;
+  height: 16px;
+}
 @media (max-width: 1000px) {
   .layout {
     grid-template-columns: minmax(0, 1fr);
   }
+}
+/* Temas y plan de sesiones de la propuesta. */
+.seccion {
+  display: grid;
+  gap: var(--space-3);
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.seccion legend {
+  font: var(--font-control);
+  margin-bottom: var(--space-1);
+}
+.opcional {
+  color: var(--color-muted);
+  font-weight: normal;
+}
+.fila-lista {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: var(--space-2);
+}
+.tarjeta-sesion {
+  display: grid;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  border: 1px solid var(--color-outline);
+  border-radius: var(--radius-control);
+}
+.encabezado-sesion {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.encabezado-sesion h3 {
+  font: var(--font-control);
+}
+.fecha-hora {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-3);
+}
+.error-lista {
+  font: var(--font-help);
+  color: var(--color-error);
+}
+.notice.warning {
+  background: var(--color-warning-surface);
+  color: var(--color-warning);
 }

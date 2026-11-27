@@ -27,10 +27,9 @@ export const routes: Routes = [
         (m) => m.RecomendacionesIa,
       ),
   },
-  {
-    path: 'crear-con-ia',
-    loadComponent: () => import('./gestion/crear-con-ia').then((m) => m.CrearConIa),
-  },
+  // La creación con IA ahora es el asistente dentro de "Crear grupo"; los enlaces viejos
+  // llegan ahí.
+  { path: 'crear-con-ia', redirectTo: 'crear' },
   // Las solicitudes de ingreso de TODOS mis grupos, fuera del layout de un grupo:
   // cada tarjeta dice a qué grupo pertenece.
   {

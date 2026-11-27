@@ -38,17 +38,10 @@
       >
     }
   </mat-card>
-  @if (rol === 'tutor') {
-    <a mat-stroked-button class="secondary-action" routerLink="/grupos/crear-con-ia" [queryParams]="{ grupos: null }"
-      queryParamsHandling="merge"
-      >Crear con apoyo de IA</a
-    >
-  } @else {
-    <a mat-stroked-button class="secondary-action" routerLink="/grupos/crear" [queryParams]="{ grupos: null }"
-      queryParamsHandling="merge"
-      >Crear mi primer grupo</a
-    >
-  }
+  <a mat-stroked-button class="secondary-action" routerLink="/grupos/crear" [queryParams]="{ grupos: null }"
+    queryParamsHandling="merge"
+    >Crear mi primer grupo</a
+  >
 } @else {
   @if (avisoCreado.clave()) {
     <div
