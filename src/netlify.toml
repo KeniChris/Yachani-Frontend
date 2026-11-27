@@ -1,0 +1,14 @@
+[build]
+  command = '''
+    sed -i "s|http://localhost:8080/api|${API_URL:?Configura API_URL en Netlify}|g" src/environments/environment.ts &&
+    npm run build
+  '''
+  publish = "dist/yachani/browser"
+
+[build.environment]
+  NODE_VERSION = "24"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
