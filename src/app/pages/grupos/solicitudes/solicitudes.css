@@ -84,3 +84,23 @@
 .request-group span {
   overflow-wrap: anywhere;
 }
+.profile-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 6px;
+  color: var(--color-primary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.profile-link mat-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 16px;
+}
+
+.profile-link:hover {
+  text-decoration: underline;
+}
