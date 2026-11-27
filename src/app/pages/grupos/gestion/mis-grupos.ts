@@ -20,15 +20,15 @@ import { crearAvisoTemporal } from '../../../core/services/aviso-temporal';
   styleUrls: ['../grupos.css', './mis-grupos.css'],
 })
 export class MisGrupos implements OnInit {
-  // Variante visual mediante ?rol=tutor y estados de Figma mediante ?grupos=vacio|creado|creado-ia.
+  // Variante visual mediante ?rol=tutor y estados de Figma mediante ?grupos=vacio|creado
   @Input() rol = 'estudiante';
-  // El ?grupos=creado|creado-ia que deja la pantalla de creación solo sirve para el
+  // El ?grupos=creado que deja la pantalla de creación solo sirve para el
   // aviso de confirmación, que se desvanece a los 3 s aunque el parámetro siga en la URL.
   readonly avisoCreado = crearAvisoTemporal();
   private gruposVisible = '';
   @Input() set grupos(valor: string) {
     this.gruposVisible = valor || '';
-    if (valor === 'creado' || valor === 'creado-ia') {
+    if (valor === 'creado') {
       this.avisoCreado.mostrar(valor);
     }
   }

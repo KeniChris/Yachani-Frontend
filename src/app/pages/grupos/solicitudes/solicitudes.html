@@ -3,9 +3,9 @@
     <h1>Solicitudes de ingreso</h1>
     <p>Revisa quién desea formar parte de tus grupos de estudio.</p>
   </div>
-  <a mat-stroked-button routerLink="/grupos/gestion" queryParamsHandling="preserve"
-    >Mis grupos</a
-  >
+  <a mat-stroked-button routerLink="/grupos/gestion" queryParamsHandling="preserve">
+    Mis grupos
+  </a>
 </header>
 
 @if (cargando()) {
@@ -37,6 +37,7 @@
       </div>
     </div>
   }
+
   @if (errorAccion()) {
     <div class="notice" role="status">
       <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">error</mat-icon>
@@ -49,7 +50,9 @@
       <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">person_add</mat-icon>
       <h2>No administras ningún grupo</h2>
       <p>Las solicitudes de ingreso aparecen aquí cuando creas un grupo de estudio.</p>
-      <a mat-flat-button routerLink="/grupos/crear" queryParamsHandling="preserve">Crear grupo</a>
+      <a mat-flat-button routerLink="/grupos/crear" queryParamsHandling="preserve">
+        Crear grupo
+      </a>
     </section>
   } @else if (lista().length === 0) {
     <section class="content-card empty-state">
@@ -60,37 +63,58 @@
         {{ misGrupos().length === 1 ? "grupo" : misGrupos().length + " grupos" }}
         aparecerán aquí.
       </p>
-      <a mat-flat-button routerLink="/grupos/gestion" queryParamsHandling="preserve"
-        >Ver mis grupos</a
-      >
+      <a mat-flat-button routerLink="/grupos/gestion" queryParamsHandling="preserve">
+        Ver mis grupos
+      </a>
     </section>
   } @else {
     <p class="help total">
       {{ lista().length }}
       {{ lista().length === 1 ? "solicitud pendiente" : "solicitudes pendientes" }}
     </p>
+
     <div class="request-grid" [class.single]="lista().length === 1">
       @for (solicitud of lista(); track solicitud.idSolicitud) {
         <article class="content-card request">
           <div class="request-person">
-            <span class="avatar" aria-hidden="true">{{ iniciales(solicitud.nombreEstudiante) }}</span>
+            <span class="avatar" aria-hidden="true">
+              {{ iniciales(solicitud.nombreEstudiante) }}
+            </span>
+
             <div>
               <h2>{{ solicitud.nombreEstudiante }}</h2>
               <p class="help">
                 Solicitó unirse el {{ solicitud.fechaSolicitud | date: "d MMM y" }}
               </p>
+
+              <a
+                class="profile-link"
+                routerLink="/perfiles/otro-estudiante"
+                [queryParams]="{ idEstudiante: solicitud.idEstudiante }"
+                [attr.aria-label]="'Ver el perfil de ' + solicitud.nombreEstudiante"
+              >
+                Ver perfil
+                <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">
+                  arrow_forward
+                </mat-icon>
+              </a>
             </div>
           </div>
+
           <a
             class="request-group"
             [routerLink]="['/grupos', solicitud.idGrupo]"
             queryParamsHandling="preserve"
             [attr.aria-label]="'Ver el grupo ' + solicitud.nombreGrupo"
           >
-            <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">groups</mat-icon>
+            <mat-icon fontSet="material-symbols-rounded" aria-hidden="true">
+              groups
+            </mat-icon>
             <span>{{ solicitud.nombreGrupo }}</span>
           </a>
+
           <p class="pending">Pendiente de revisión</p>
+
           <div class="request-actions">
             <button
               mat-stroked-button
@@ -108,6 +132,7 @@
             >
               Rechazar
             </button>
+
             <button
               mat-flat-button
               type="button"
@@ -139,11 +164,14 @@
         <mat-icon fontSet="material-symbols-rounded">close</mat-icon>
       </button>
     </div>
+
     <mat-dialog-content>
       <p>
-        {{ solicitud.nombreEstudiante.split(' ')[0] }} podrá participar en el chat, las sesiones y los recursos de {{ solicitud.nombreGrupo }}.
+        {{ solicitud.nombreEstudiante.split(' ')[0] }} podrá participar en el chat,
+        las sesiones y los recursos de {{ solicitud.nombreGrupo }}.
       </p>
     </mat-dialog-content>
+
     <mat-dialog-actions>
       <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
       <button
@@ -166,9 +194,14 @@
         <mat-icon fontSet="material-symbols-rounded">close</mat-icon>
       </button>
     </div>
+
     <mat-dialog-content>
-      <p>{{ solicitud.nombreEstudiante.split(' ')[0] }} recibirá una notificación con el resultado.</p>
+      <p>
+        {{ solicitud.nombreEstudiante.split(' ')[0] }} recibirá una notificación
+        con el resultado.
+      </p>
     </mat-dialog-content>
+
     <mat-dialog-actions>
       <button mat-stroked-button type="button" mat-dialog-close>Cancelar</button>
       <button
