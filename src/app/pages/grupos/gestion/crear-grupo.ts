@@ -229,7 +229,8 @@ export class CrearGrupo {
       if (valor === null || valor === undefined) continue;
       const control = this.form.controls[campo];
       // Si ya había una sugerencia sin resolver, "anterior" sigue siendo el valor original.
-      const anterior = this.sugerencias()[campo]?.anterior ?? control.value;
+      const previa = this.sugerencias()[campo];
+      const anterior = previa ? previa.anterior : control.value;
       this.sugerencias.update((actuales) => ({
         ...actuales,
         [campo]: { anterior, sugerido: valor },

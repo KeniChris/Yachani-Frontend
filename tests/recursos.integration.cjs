@@ -609,14 +609,28 @@ test('Ingreso: si el grupo se llena durante el envío, actualiza los cupos sin m
   assert.equal(await page.locator('.notice.warning').count(), 0);
 });
 
-test('Asistente IA en Crear grupo: pide el nombre, sugiere una descripción genérica y se acepta o descarta', { timeout: 60000 }, async (t) => {
-  const { s, context, page } = await sesion(t);
-  // Por ahora el asistente es una simulación local: no debe llamar al backend.
-  let llamadasIa = 0;
-  await context.route('**/api/ia/**', (route) => {
-    llamadasIa++;
-    return route.fulfill({ status: 500, json: {} });
+// El agente de IA se simula: estas pruebas no llaman al modelo real.
+async function simularAgente(context) {
+  const pedidos = [];
+  await context.route('**/api/ia/tutorias/ajuste', async (route) => {
+    const datos = route.request().postDataJSON();
+    pedidos.push(datos);
+    const capacidad = datos.mensaje.match(/capacidad (\d+)/);
+    const cambios = capacidad
+      ? { capacidadMaxima: Number(capacidad[1]) }
+      : { descripcion: `Un espacio para estudiar ${datos.propuesta.nombre} en equipo.` };
+    const respuesta = capacidad
+      ? `Te sugerí una capacidad de ${capacidad[1]}.`
+      : 'Te sugerí un cambio en la descripción.';
+    await new Promise((resolver) => setTimeout(resolver, 300));
+    return route.fulfill({ status: 200, json: { respuesta, cambios, estado: 'COMPLETA', faltantes: [] } });
   });
+  return pedidos;
+}
+
+test('Asistente IA en Crear grupo: sugiere cambios del agente y se aceptan o descartan', { timeout: 60000 }, async (t) => {
+  const { s, context, page } = await sesion(t);
+  const pedidos = await simularAgente(context);
   const creaciones = [];
   await context.route('**/api/grupos', (route) => {
     if (route.request().method() !== 'POST') return route.fallback();
@@ -629,11 +643,12 @@ test('Asistente IA en Crear grupo: pide el nombre, sugiere una descripción gen�
 
   await login(page, s);
   await ir(page, '/grupos/crear');
-  // El acceso separado "Crear grupo con IA" ya no está en el menú del tutor.
   assert.equal(await page.getByRole('link', { name: 'Crear grupo con IA' }).count(), 0);
 
   const nombre = page.getByRole('textbox', { name: 'Nombre del grupo' });
   const descripcion = page.getByRole('textbox', { name: 'Descripción' });
+  const capacidad = page.getByRole('spinbutton', { name: 'Capacidad máxima' });
+  await nombre.fill('Ingeniería de Software: repasos');
   await descripcion.fill('Un espacio para repasar conceptos.');
 
   await page.getByRole('button', { name: 'Asistente IA' }).click();
@@ -643,22 +658,14 @@ test('Asistente IA en Crear grupo: pide el nombre, sugiere una descripción gen�
   assert.equal(await enviar.isDisabled(), true);
   const mensaje = panel.getByRole('textbox', { name: 'Mensaje para el asistente' });
 
-  // Sin nombre no hay recomendación.
+  // La sugerencia se puede descartar y vuelve el texto del tutor.
   await mensaje.fill('Mejora mi descripción de grupo');
   await mensaje.press('Enter');
   await ver(panel.getByText('Pensando…'));
-  await ver(panel.getByText(/necesito el nombre del grupo/));
-  assert.equal(await descripcion.inputValue(), 'Un espacio para repasar conceptos.');
-  await esperar(async () => (await page.getByText('Sugerido por la IA').count()) === 0);
-
-  // Con nombre, sugiere la descripción genérica y se puede descartar.
-  await nombre.fill('Ingeniería de Software: repasos');
-  await mensaje.fill('Mejorar descripcion');
-  await enviar.click();
-  await ver(panel.getByText(/Te sugerí un cambio en la descripción/));
-  const sugerida =
-    'Un espacio para estudiar Ingeniería de Software: repasos en equipo. Resolvemos dudas juntos, compartimos recursos y practicamos con ejercicios para llegar con confianza a las evaluaciones. Todas las preguntas son bienvenidas.';
+  await ver(panel.getByText('Te sugerí un cambio en la descripción.'));
+  const sugerida = 'Un espacio para estudiar Ingeniería de Software: repasos en equipo.';
   assert.equal(await descripcion.inputValue(), sugerida);
+  assert.equal(pedidos[0].propuesta.nombre, 'Ingeniería de Software: repasos');
   await ver(page.getByText('Sugerido por la IA'));
   await page.getByRole('button', { name: 'Descartar' }).click();
   assert.equal(await descripcion.inputValue(), 'Un espacio para repasar conceptos.');
@@ -672,23 +679,33 @@ test('Asistente IA en Crear grupo: pide el nombre, sugiere una descripción gen�
   await esperar(async () => (await page.getByText('Sugerido por la IA').count()) === 0);
   assert.equal(await descripcion.inputValue(), sugerida);
 
+  // Dos sugerencias seguidas sobre un campo vacío: descartar lo deja vacío.
+  await mensaje.fill('pon capacidad 15');
+  await enviar.click();
+  await esperar(async () => (await capacidad.inputValue()) === '15');
+  await mensaje.fill('mejor capacidad 20');
+  await enviar.click();
+  await esperar(async () => (await capacidad.inputValue()) === '20');
+  await page.getByRole('button', { name: 'Descartar' }).click();
+  assert.equal(await capacidad.inputValue(), '');
+
   // Minimizar conserva la conversación.
   await panel.getByRole('button', { name: 'Minimizar asistente' }).click();
   await page.getByRole('button', { name: 'Asistente IA' }).click();
-  await ver(panel.getByText('Mejorar descripcion'));
+  await ver(panel.getByText('Mejora mi descripción de grupo').first());
 
   await page.getByRole('combobox', { name: 'Método de estudio' }).click();
   await page.getByRole('option', { name: 'Resolución de ejercicios', exact: true }).click();
-  await page.getByRole('spinbutton', { name: 'Capacidad máxima' }).fill('12');
+  await capacidad.fill('12');
   await panel.getByRole('button', { name: 'Minimizar asistente' }).click();
   await page.getByRole('button', { name: 'Crear grupo', exact: true }).click();
-  await page.waitForURL(/\/grupos\/gestion\?.*grupos=creado/);
+  await esperar(async () => creaciones.length === 1);
   assert.equal(creaciones[0].descripcion, sugerida);
-  assert.equal(llamadasIa, 0);
 });
 
 test('Asistente IA en Crear grupo: cabe en móvil, cerrar reinicia y la ruta vieja redirige', { timeout: 60000 }, async (t) => {
-  const { s, page } = await sesion(t, {}, { width: 375, height: 812 });
+  const { s, context, page } = await sesion(t, {}, { width: 375, height: 812 });
+  await simularAgente(context);
   await login(page, s);
   await ir(page, '/grupos/crear-con-ia');
   await page.waitForURL(/\/grupos\/crear(\?|$)/);
@@ -698,7 +715,7 @@ test('Asistente IA en Crear grupo: cabe en móvil, cerrar reinicia y la ruta vie
   const panel = page.getByRole('dialog', { name: 'Asistente IA' });
   await panel.getByRole('textbox', { name: 'Mensaje para el asistente' }).fill('Mejora mi descripción');
   await panel.getByRole('button', { name: 'Enviar al asistente' }).click();
-  await ver(panel.getByText(/Te sugerí un cambio en la descripción/));
+  await ver(panel.getByText('Te sugerí un cambio en la descripción.'));
   assert.match(
     await page.getByRole('textbox', { name: 'Descripción' }).inputValue(),
     /^Un espacio para estudiar Cálculo I en equipo\./,
